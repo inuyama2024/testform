@@ -85,7 +85,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>予約フォームaaaaa</h1>
+        <h1>予約フォーム</h1>
         <label for="name">お客様名</label>
         <input type="text" id="name" placeholder="お名前を入力してください">
 
@@ -100,7 +100,7 @@
 
         <label>コース</label>
         <div class="symptoms">
-            <button type="button" onclick="selectSymptom(this)">test整体・ボディケア60分</button>
+            <button type="button" onclick="selectSymptom(this)">整体・ボディケア60分</button>
             <button type="button" onclick="selectSymptom(this)">整体ボディケア＋セルフ整体エクササイズ</button>
         </div>
 
@@ -115,7 +115,6 @@
             <button type="button" onclick="toggleOtherSymptom(this)">身体の歪み</button>
             <button type="button" onclick="toggleOtherSymptom(this)">猫背</button>
             <button type="button" onclick="toggleOtherSymptom(this)">その他</button>
-            <!-- 他の症状ボタンも同様に追加 -->
         </div>
 
         <label for="date1">第1希望日※必須<br>営業曜日【水土】<br>予約可能時間は10時or13時です。</label>
@@ -150,19 +149,36 @@
                 // LIFF初期化失敗時の処理
                 console.error('LIFF初期化失敗', err);
             });
+
+            const visitButtons = document.querySelectorAll('.visit-buttons button');
+            visitButtons.forEach(button => {
+                button.addEventListener('click', () => selectVisit(button));
+            });
+
+            const symptomButtons = document.querySelectorAll('.symptoms button');
+            symptomButtons.forEach(button => {
+                button.addEventListener('click', () => selectSymptom(button));
+            });
+
+            const otherSymptomButtons = document.querySelectorAll('.other-symptoms button');
+            otherSymptomButtons.forEach(button => {
+                button.addEventListener('click', () => toggleOtherSymptom(button));
+            });
+
+            document.querySelector('.submit-button').addEventListener('click', submitForm);
         });
 
         function selectVisit(element) {
-            document.getElementById('firstVisit').classList.remove('active');
-            document.getElementById('repeatVisit').classList.remove('active');
+            document.querySelectorAll('.visit-buttons button').forEach(button => {
+                button.classList.remove('active');
+            });
             element.classList.add('active');
             visitCount = element.innerText;
         }
 
         function selectSymptom(element) {
-            const allSymptoms = document.querySelectorAll('.symptoms button');
-            allSymptoms.forEach(symptom => {
-                symptom.classList.remove('active');
+            document.querySelectorAll('.symptoms button').forEach(button => {
+                button.classList.remove('active');
             });
             element.classList.add('active');
             selectedSymptom = element.innerText;
@@ -202,13 +218,11 @@
             // LINEトークにメッセージを送信
             liff.sendMessages([{
                 type: 'text',
-                text: 【予約フォーム】\nお名前：${formData.name}\n電話番号：${formData.phone}\n訪問回数：${formData.visitCount}\nコース：${formData.symptoms}\n症状：${formData.otherSymptoms.join(', ')}\n希望日時：\n ${formData.dates[0]}\n${formData.dates[1]}\n${formData.dates[2]}\nメッセージ：${formData.message}
+                text: `【予約フォーム】\nお名前：${formData.name}\n電話番号：${formData.phone}\n訪問回数：${formData.visitCount}\nコース：${formData.symptoms}\n症状：${formData.otherSymptoms.join(', ')}\n希望日時：\n ${formData.dates[0]}\n${formData.dates[1]}\n${formData.dates[2]}\nメッセージ：${formData.message}`
             }]).then(() => {
-                alert('当日キャンセルは無いようにお願いいたします。キャンセル料発生いたします。 ' );
-                // LIFFウィンドウを閉じる
+                alert('当日キャンセルは無いようにお願いいたします。キャンセル料発生いたします。');
                 liff.closeWindow();
             }).catch((err) => {
-                // 失敗時の処理（エラーメッセージを表示しない）
                 console.error('メッセージの送信に失敗しました', err);
             });
         }
